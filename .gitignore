@@ -1,0 +1,9 @@
+unittest
+__pycache__
+launch.json
+*.db
+log
+*.gob
+.venv
+.pytest_cache
+.vscode

@@ -1,0 +1,6 @@
+SecretPath: "secret.gob"
+HOST: "localhost:3000"
+SIGNUP_KEY: ""
+DATA_DIR: "."
+MAX_STORAGE_GB: 10
+MAX_SITES_PER_USER: 5
