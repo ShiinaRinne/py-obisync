@@ -1,4 +1,5 @@
 unittest
+tests
 __pycache__
 launch.json
 *.db

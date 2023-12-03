@@ -5,8 +5,9 @@ from jose import jwt
 from sqlalchemy.exc import IntegrityError
 
 from obsync.schemas.user import *
-from obsync.utils import get_jwt_email
+from obsync.utils import get_jwt_email, milisec
 from obsync.db import vault
+from obsync.db.models.vault import User
 from obsync.db.exceptions import *
 from obsync.config import config
 from obsync.logger import logger
@@ -39,7 +40,10 @@ async def signup(request: SignUpRequest):
         vault.new_user(request.email, request.password, request.name)
         logger.info(f"Created new user: {request.email}-{request.name}")
     except IntegrityError as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e) + "user exists")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e) + "user exists",
+        )
     return {"email": request.email, "name": request.name}
 
 
@@ -97,7 +101,7 @@ async def user_info(request: UserInfoRequest):
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Not logged in"
         )
 
-    user_info = vault.user_info(email)
+    user_info:User = vault.user_info(email)
     if not user_info:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
@@ -113,7 +117,7 @@ async def user_info(request: UserInfoRequest):
         mfa=False,
         discount={
             "status": "approved",
-            "expiry_ts": time.time() * 1000 + 365 * 24 * 60 * 60 * 1000,
+            "expiry_ts": milisec(offset=365 * 24 * 60 * 60),
             "type": "education",
         },
     )

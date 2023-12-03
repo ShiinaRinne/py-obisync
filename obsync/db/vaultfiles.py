@@ -1,4 +1,3 @@
-import time
 from typing import List
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -6,6 +5,7 @@ from sqlalchemy.orm import Session
 from obsync.schemas.vaultfiles import FileResponse, HistoryFileResponse, FileInfo
 from obsync.logger import logger
 from obsync.db import session_handler
+from obsync.utils import milisec
 
 from .models.vaultfiles import File
 
@@ -136,18 +136,18 @@ def get_deleted_files(session: Session) -> List[dict]:
 
 @session_handler
 def insert_metadata(file: File, session: Session) -> int:
-    current_time = int(time.time() * 1000)
-    if file.created == 0:  # type: ignore
-        file.created = current_time  # type: ignore
-    if file.modified == 0:  # type: ignore
-        file.modified = current_time # type: ignore
+    current_time = milisec()
+    if file.created == 0:
+        file.created = current_time
+    if file.modified == 0:
+        file.modified = current_time
 
     session.query(File).filter(File.path == file.path, File.newest == True).update(
         {"newest": False}
     )
     session.add(file)
     session.commit()
-    return file.uid # type: ignore
+    return file.uid
 
 
 @session_handler

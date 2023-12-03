@@ -4,6 +4,11 @@ import hashlib
 import random
 from obsync.config import config
 from loguru import logger
+import time
+
+
+def milisec(time: float = time.time(), offset: float = 0) -> float:
+    return (time + offset) * 1000
 
 
 def get_jwt_email(jwt_string):
@@ -69,7 +74,9 @@ def generate_password(length, num_digits, num_symbols, no_upper, allow_repeat):
     if not allow_repeat and (
         chars > len(letters) or num_digits > len(digits) or num_symbols > len(symbols)
     ):
-        raise ValueError("Number of required characters exceeds the available characters.")
+        raise ValueError(
+            "Number of required characters exceeds the available characters."
+        )
 
     def random_element(elements, existing_elements):
         element = random.choice(elements)

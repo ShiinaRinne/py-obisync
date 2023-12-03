@@ -4,7 +4,7 @@ import bcrypt
 from typing import List
 from sqlalchemy.orm import Session
 
-from obsync.utils import MakeKeyHash
+from obsync.utils import MakeKeyHash, milisec
 from obsync.config import config
 from obsync.schemas import VaultInfo
 from obsync.db import session_handler
@@ -131,7 +131,7 @@ def new_vault(
     vault = Vault(
         id=str(uuid.uuid4()),
         user_email=email,
-        created=int(time.time()) * 1000,
+        created=milisec(),
         host=config.Host,
         name=name,
         password=password,
@@ -161,7 +161,7 @@ def delete_vault(vault_id: str, email: str, session: Session) -> None:
     ).delete()
     session.commit()
 
-
+# TODO: 不设置vault密码时会报错 keyhash not match
 @session_handler
 def get_vault(vault_id: str, keyhash: str, session: Session) -> Vault:
     vault = session.query(Vault).filter(Vault.id == vault_id).first()

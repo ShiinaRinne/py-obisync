@@ -1,5 +1,6 @@
 from fastapi import APIRouter
-import time
+
+from obsync.utils import milisec
 
 subscript_router = APIRouter(prefix="/subscription")
 
@@ -11,7 +12,7 @@ def list_subscriptions():
         "publish": None,
         "sync": {
             "earlybird": False,
-            "expirt_ts": (time.time() + 3600 * 24 * 365 * 10) * 1000,
+            "expirt_ts": milisec(offset=365 * 24 * 60 * 60),
             "renew": "",
         },
     }
