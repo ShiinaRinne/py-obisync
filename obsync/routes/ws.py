@@ -1,12 +1,14 @@
 import json
 from fastapi import WebSocket, APIRouter
-from typing import Dict, Any
+from typing import Dict, Any, List
 from pydantic import BaseModel
 from starlette.websockets import WebSocketDisconnect
 
 from obsync.db import vault, vaultfiles
+from obsync.db.models import Vault
 from obsync.utils import *
 from obsync.schemas.vaultfiles import (
+    FileInfo,
     WSHandlerPushModel,
     WSHandlerPullModel,
     WSHandlerHistoryModel,
@@ -63,7 +65,7 @@ async def handle_message(
         case "pull":
             pull = WSHandlerPullModel(**msg)
             uid: int = utils.to_int(pull.uid)
-            file = vaultfiles.get_file(uid)
+            file = vaultfiles.get_file(uid) # type: ignore
             pieces = 0 if file.size == 0 else 1
             await ws.send_json({"hash": file.hash, "size": file.size, "pieces": pieces})
             if file.size != 0:
@@ -72,7 +74,7 @@ async def handle_message(
         case "push":
             metadata = WSHandlerPushModel(**msg)
             if metadata.deleted:
-                vaultfiles.delete_vault_file(metadata.path)
+                vaultfiles.delete_vault_file(metadata.path) # type: ignore
                 vaultUID = metadata.uid
             else:
                 vaultUID = vaultfiles.insert_metadata(
@@ -87,8 +89,8 @@ async def handle_message(
                         folder=metadata.folder,
                         deleted=metadata.deleted,
                     )
-                )
-            if metadata.size > 0:
+                ) # type: ignore
+            if metadata.size is not None and metadata.size > 0:
                 full_binary = b""
                 for _ in range(metadata.pieces):
                     await ws.send_json({"res": "next"})
@@ -103,7 +105,7 @@ async def handle_message(
 
         case "history":
             history = WSHandlerHistoryModel(**msg)
-            files = vaultfiles.get_file_history(history.path)
+            files = vaultfiles.get_file_history(history.path) # type: ignore
             files = [file.model_dump() for file in files]
             await ws.send_json({"items": files, "more": False})
 
@@ -111,13 +113,13 @@ async def handle_message(
             await ws.send_json({"op": "pong"})
 
         case "deleted":
-            files = vaultfiles.get_deleted_files()
+            files = vaultfiles.get_deleted_files() # type: ignore
             await ws.send_json({"items": files})
 
         case "restore":
             restore = WSHandlerRestoreModel(**msg)
             uid: int = utils.to_int(restore.uid)
-            file = vaultfiles.restore_file(uid)
+            file = vaultfiles.restore_file(uid) # type: ignore
             await channels[connectedVault.id].broadcast(file.model_dump())
             await ws.send_json({"res": "ok"})
 
@@ -140,11 +142,11 @@ async def websocket_endpoint(ws: WebSocket):
         # Validate token and key hash
         email = get_jwt_email(connectionInfo.token)
 
-        connectedVault = vault.get_vault(connectionInfo.id, connectionInfo.keyhash)
+        connectedVault:Vault = vault.get_vault(connectionInfo.id, connectionInfo.keyhash) # type: ignore
 
         logger.info(f"{email} - {connectionInfo.device} connected")
 
-        if not vault.has_access_to_vault(connectedVault.id, email):
+        if not vault.has_access_to_vault(connectedVault.id, email): # type: ignore
             await ws.send_json({"error": "no access to vault"})
             logger.info(
                 f"{email} - {connectionInfo.device} has no access to vault {connectedVault.id}"
@@ -155,7 +157,7 @@ async def websocket_endpoint(ws: WebSocket):
         version = to_int(connectionInfo.version)
 
         if connectedVault.version > version:
-            files = vaultfiles.get_vault_files(connectedVault.id)
+            files:List[FileInfo] = vaultfiles.get_vault_files(connectedVault.id) # type: ignore
             for file in files:
                 await ws.send_json(
                     {

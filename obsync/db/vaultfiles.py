@@ -89,7 +89,7 @@ def get_vault_files(vault_id: str, session: Session) -> List[FileInfo]:
 
 @session_handler
 def get_file(uid: int, session: Session) -> FileInfo:
-    file = session.query(File.hash, File.size, File.data).filter(File.uid == uid).first()
+    file:File = session.query(File.hash, File.size, File.data).filter(File.uid == uid).first()
     return FileInfo(
         hash=file.hash,
         size=file.size,

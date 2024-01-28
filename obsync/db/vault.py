@@ -176,7 +176,7 @@ def get_vault(vault_id: str, keyhash: str, session: Session) -> Vault:
         salt=vault.salt,
         size=vault.size,
         version=vault.version,
-    )
+    ) # type: ignore
 
 
 @session_handler

@@ -16,8 +16,23 @@ there may be many behaviors that are unexpected.
 
 Support 1.4.16(Windows and Android has been tested)
 
+
+
+### Nginx Example
+```
+    location / {
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $http_host;
+        proxy_redirect off;
+        proxy_pass http://127.0.0.1:6666;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+```
+
 ## TODO:
 
 - [ ] fix bug
-- [ ] publish
+- [ ] optimize publish
 

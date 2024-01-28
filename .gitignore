@@ -8,3 +8,5 @@ log
 .venv
 .pytest_cache
 .vscode
+*.db
+*.bak

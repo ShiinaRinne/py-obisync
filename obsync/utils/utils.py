@@ -7,8 +7,8 @@ from loguru import logger
 import time
 
 
-def milisec(time: float = time.time(), offset: float = 0) -> float:
-    return (time + offset) * 1000
+def milisec(time: float = time.time(), offset: float = 0) -> int:
+    return int((time + offset) * 1000)
 
 
 def get_jwt_email(jwt_string):
@@ -106,8 +106,7 @@ def getKey(
     r: int = 8,
     p: int = 1,
     key_len: int = 32,
-    maxmem: int = 2
-    << 25,  # If not specified, it will cause a ValueError: [digital envelope routines] memory limit exceeded
+    maxmem: int = 2 << 25,  # If not specified, it will cause a ValueError: [digital envelope routines] memory limit exceeded
 ) -> bytes:
     normalizedE = e.encode()
     normalizedT = t.encode()
